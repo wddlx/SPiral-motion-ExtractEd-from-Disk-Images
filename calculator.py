@@ -14,7 +14,7 @@ class spiralArmMotionCalculator:
         self.imgPath = imgPath
         self.img = fits.open(imgPath)[0].data
 
-
+    #Convert the initial figure to polar coodinates, with deprojecting and r^2 re-scaling.
     def converting(self, PA=0,inclination=0,final_radius=100,pw=360,r0=40,times=2,center=None):
         theta_ , R_ = np.meshgrid(np.linspace(0, 2*np.pi, pw),
                                 np.arange(0, final_radius))
@@ -96,8 +96,41 @@ class spiralArmMotionCalculator:
         plt.imshow(z2, cmap= 'gray',origin='lower')
         return z2
 
+    #Inspect the data from converted figure.
+    def Ispt(img_p,x,y_init=0,y_fin=None,cen=None,w=5):
+        X=[]
+        Y=[]
+        i=y_init
+        max1=0
+        a=0
+        if y_fin!=None:
+            fin=y_fin
+        else:
+            fin=len(img_p)
+        while i < y_fin:
+    #        if poa[i][j]>=0.1:
+            y=img_p[i][j]
+            X.append(i)
+            Y.append(y)
+            if poa[i][j]>max1:
+                max1=img_p[i][j]
+                a=i
+            i+=1
+        xdata=X
+        ydata=Y
+        b=img_p[a][j]
+        if cen==None:
+            cen=Y.index(max(Y))
+        d1=int(min(X))
+        s=w/2
+        popt, pcov = curve_fit(gs,xdata[cen-w:cen+w],ydata[cen-w:cen+w],[b-d1,s,a,d1],maxfev=5000000)
+
+        print(popt)
+        plt.plot(xdata, gs(xdata, *popt), 'r-')
+        plt.plot(X,Y,"g.",markersize=2,linewidth=1,markerfacecolor="None")
 
     @staticmethod
+    #Fit the center of the spirals
     def fitForCenter(img_p,x_init,x_fin,y_init,y_fin,width=10,mini=None,
                    theta=None,rad=None,prob=None):
         if theta == None and rad == None and prob == None:
@@ -142,6 +175,7 @@ class spiralArmMotionCalculator:
 
 
     @staticmethod
+    #fit the motion of spirals of figures from different epochs.
     def fitting(theta1,theta2,rad1,rad2,prob1,prob2,est=-0.1,withRn=True):
         def f_withRn(X,rp,n,a0,a1,a2,a3,a4,a5):
             z,y,k = X
