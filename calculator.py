@@ -18,8 +18,12 @@ class spiralArmMotionCalculator:
     def converting(self, PA=0,inclination=0,final_radius=100,pw=360,r0=40,times=2,center=None):
         theta_ , R_ = np.meshgrid(np.linspace(0, 2*np.pi, pw),
                                 np.arange(0, final_radius))
-        if center == None:
-            center = [len(self.img)/2, len(self.img)/2]
+    	if center==None:
+        		if len(img)/2 ==0:
+            		c=len(img)/2-0.5
+        		else:
+            		c=(len(img)-1)/2
+        		center=[c,c]
 
         x = np.linspace(0, len(self.img)-1, len(self.img), dtype=int)
         y = np.linspace(0, len(self.img)-1, len(self.img), dtype=int)
